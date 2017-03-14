@@ -49,7 +49,9 @@ If ($command -eq "load"){
 
 	$ext = $URL.Substring($URL.Length -3, 3)
 	If ($Ext.Equals("zip")){
-		Expand-Archive $temppath\$server.tmp -DestinationPath $temppath\$server.tmp -force
+        Move-Item $tempPath\$server.tmp -Destination $tempPath\$server.zip
+		Expand-Archive $temppath\$server.zip -DestinationPath $temppath\$server -force
+        gci $temppath\$server | where {$_.Extension -eq ".sv6"} | select -first 1 | Move-Item -Destination $tempPath\$server.tmp
 	}
 
 	cpi $temppath\$server.tmp $path\$server\$server.sv6
