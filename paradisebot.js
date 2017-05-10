@@ -21,6 +21,10 @@ var fs = require('fs');
 
 client.on('message', msg => {
     if (msg.content.startsWith(prefix)) {
+        //Log
+        fs.appendFile('bot.log', timeStamp('log') + msg.content + ' by ' + msg.author.id + '\n', function (err) {
+            if (err) throw err;
+        });
         //Diagnostic & Help
         if (msg.content === (prefix + 'ping')) {
             msg.channel.send('pong!');
@@ -47,7 +51,6 @@ client.on('message', msg => {
             }
         }
         //Begin server specific commands
-
         //Restart      
         else if ((msg.content.startsWith(prefix)) && (msg.content.endsWith('restart'))) {
             server = msg.content.substring(1, 4);
@@ -75,8 +78,7 @@ client.on('message', msg => {
                 command = 'chatlog';
                 exec('powershell.exe ' + paradisePath + 'main.ps1 ' + command + ' ' + server);
                 msg.channel.send('Getting ' + server + ' most recent chatlog...');
-                var datetime = new Date();
-                setTimeout(function () { msg.channel.sendFile(tempPath + server + 'chatlog.txt', server + '_' + datetime + ' chatlog.txt'); }, 5000);
+                setTimeout(function () { msg.channel.sendFile(tempPath + server + 'chatlog.txt', server + '_' + timeStamp('file') + ' chatlog.txt'); }, 5000);
             }
             else msg.channel.send('Invalid server name or permissions');
         }
@@ -102,11 +104,11 @@ client.on('message', msg => {
                 exec('powershell.exe ' + paradisePath + 'main.ps1 ' + command + ' ' + server);
                 msg.channel.send('Getting ' + server + ' most recent autosave...');
                 var datetime = new Date();
-                setTimeout(function () { msg.channel.sendFile(tempPath + server + '.sv6', server + '_' + datetime + '.sv6'); }, 5000);
+                setTimeout(function () { msg.channel.sendFile(tempPath + server + '.sv6', server + '_' + timeStamp('file') + '_autosave.sv6'); }, 5000);
             }
             else msg.channel.send('Invalid server name or permissions');
         }
-
+		//Invalid Command
         else if ((msg.content.startsWith(prefix)) && (msg.content.length > 1)) {
             msg.channel.send('Invalid Command, see `!help`');
         }
@@ -118,6 +120,29 @@ client.on('ready', () => {
 });
 
 client.login(config.token);
+
+function timeStamp(isFile) {
+    var date = new Date();
+
+    var hour = date.getHours();
+    hour = (hour < 10 ? "0" : "") + hour;
+
+    var min = date.getMinutes();
+    min = (min < 10 ? "0" : "") + min;
+
+    var month = date.getMonth() + 1;
+    month = (month < 10 ? "0" : "") + month;
+
+    var day = date.getDate();
+    day = (day < 10 ? "0" : "") + day;
+	if (isFile == 'file') {
+		
+		return month + day + hour + min + 'CST';
+	}
+	else {
+		return '[' + month + "/" + day + " " + hour + ":" + min + ']';
+	}
+}
 
 //To be cleaned up at a later date
 function permCheck(server, authorID) {
