@@ -9,28 +9,37 @@ $tempPath = $path + "\_paradisebot\temp"
 
 If ($command -eq "update"){
 	$serverList = ((Get-Content .\config.json | ConvertFrom-Json).serverList)
-	
-    #Kill Servers; Needs to pull servers from json
-	foreach ($server in $serverList) {
-		taskkill /FI "Windowtitle eq $server"
-		Get-Process | where {$_.mainwindowtitle -match $server} | Wait-Process}
+    If (!$server) {$server = "latest"}
 
-	#Download Latest Build
-	$RCTDownload = Invoke-WebRequest "https://openrct2.org/downloads/develop/latest" | select -ExpandProperty Links | select href | Select-String -InputObject {$_} -Pattern "windows-x64.zip"
+    #Download Build
+	$RCTDownload = Invoke-WebRequest "https://openrct2.org/downloads/develop/${server}" | select -ExpandProperty Links | select href | Select-String -InputObject {$_} -Pattern "windows-x64.zip"
 	$RCTDownload | Set-Content $temppath\link.txt
 	(Get-Content $temppath\link.txt).Replace('@{href=','') | Set-Content $temppath\link.txt
 	(Get-Content $temppath\link.txt).Replace('}','') | Set-Content $temppath\link.txt
 	$URL = (Get-Content $temppath\link.txt)
-	Invoke-webrequest -uri $URL -OutFile $temppath\latest.zip
+	Invoke-webrequest -uri $URL -OutFile $temppath\build.zip
 
 	#Unzip Build
-	Expand-Archive $temppath\latest.zip -DestinationPath $path\_Portable -force
+	Expand-Archive $temppath\build.zip -DestinationPath $tempPath\build
+	
+	#Check if file exists
+    If (Test-Path "$tempPath\build\openrct2.com"){
 
-	#Copy Latest Autosave and launch server
-	foreach ($server in $serverList) {
-	Start-Sleep -Seconds 10
-	gci $path\$server\save | sort LastWriteTime -desc | select -first 1 | cpi -dest $path\$server\$server.sv6
-	Start-Process $path\$server\$server.bat}
+        #Kill Servers
+	    foreach ($server in $serverList) {
+	    taskkill /FI "Windowtitle eq $server"
+	    Get-Process | where {$_.mainwindowtitle -match $server} | Wait-Process}
+
+	    #Copy file to production
+	    Copy-Item $tempPath\build\* $path\_Portable -force
+
+	    #Copy Latest Autosave and launch server
+	    foreach ($server in $serverList) {
+	    Start-Sleep -Seconds 10
+	    gci $path\$server\save | sort LastWriteTime -desc | select -first 1 | cpi -dest $path\$server\$server.sv6
+	    Start-Process $path\$server\$server.bat}
+    }
+    Remove-Item $tempPath\build -Recurse
 }
 
 If ($command -eq "restart"){
@@ -66,7 +75,9 @@ If ($command -eq "autosave"){
 }
 
 If ($command -eq "chatlog"){
-    echo Running Chatlog
 	gci $path\$server\chatlogs | sort LastWriteTime -desc | select -first 1 | cpi -dest $temppath\${server}chatlog.txt
-    echo $path\$server\chatlogs
+}
+
+If ($command -eq "serverlog"){
+	gci $path\$server\serverlogs | sort LastWriteTime -desc | select -first 1 | cpi -dest $temppath\${server}serverlog.txt
 }

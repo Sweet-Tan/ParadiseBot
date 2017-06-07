@@ -39,15 +39,17 @@ client.on('message', msg => {
 			msg.channel.send('https://www.youtube.com/watch?v=rATftJiWdkw');
 		}
         else if (msg.content === (prefix + 'help')) {
-            msg.channel.send('--Paradise Bot v1.4-- \n \n Server Names: ' + serverList + ' \n \n `!help` - List available commands \n `!ping` - Pings the Paradise Bot \n `!ding` - A less mature ping \n \n `!update` - Automatically kills, updates, and restarts all servers \n `!(name)autosave` - Gets the latest autosave from the specified server, stamped at time of retrieval \n `!(name)chatlog` - Gets the most recent chatlog from the specified server \n `!(name)kill` - Stops the specified server \n `!(name)load` - Starts the specified server with the attached save file, .zip or .sv6 \n `!(name)restart` - Stops and starts the specified server');
+            msg.channel.send('--Paradise Bot v1.5-- \n \n Server Names: ' + serverList + ' \n \n `!help` - List available commands \n `!ping` - Pings the Paradise Bot \n `!ding` - A less mature ping \n \n `!update` - Updates servers to the latest build. For specific build, add the 7 digit build number. Example: `!update 36f1210` \n \n `!(name)autosave` - Gets the latest autosave from the specified server, stamped at time of retrieval \n `!(name)chatlog` - Gets the most recent chatlog from the specified server \n `!(name)serverlog` - Gets the most recent serverlog from the specified server \n `!(name)kill` - Stops the specified server \n `!(name)load` - Starts the specified server with the attached save file, .zip or .sv6 \n `!(name)restart` - Stops and starts the specified server');
         }
         
         //Update
         else if (msg.channel.name === 'security_shack') {
-            if (msg.content === (prefix + 'update')) {
+            if (msg.content.startsWith(prefix + 'update')) {
                 command = 'update';
-                msg.channel.send('Updating servers... This takes approximately 1 minute...');
-                exec('powershell.exe ' + paradisePath + 'main.ps1 ' + command);
+                server = msg.content.substring(8, 15);
+				console.log('powershell.exe ' + paradisePath + 'main.ps1 ' + command + '' + server);
+                msg.channel.send('Updating servers: ' + serverList);
+                exec('powershell.exe ' + paradisePath + 'main.ps1 ' + command + ' ' + server);
             }
         }
         //Begin server specific commands
@@ -79,6 +81,21 @@ client.on('message', msg => {
                 exec('powershell.exe ' + paradisePath + 'main.ps1 ' + command + ' ' + server);
                 msg.channel.send('Getting ' + server + ' most recent chatlog...');
                 setTimeout(function () { msg.channel.sendFile(tempPath + server + 'chatlog.txt', server + '_' + timeStamp('file') + ' chatlog.txt'); }, 5000);
+                //test
+                //setTimeout(function () { msg.channel.send({ files: [tempPath + server + 'chatlog.txt']}, server + '_' + timeStamp('file') + '_chatlog.txt' ); }, 5000);
+            }
+            else msg.channel.send('Invalid server name or permissions');
+        }
+        //Serverlog
+        else if ((msg.content.startsWith(prefix)) && (msg.content.endsWith('serverlog'))) {
+            server = msg.content.substring(1, 4);
+            if (permCheck(server, msg.author.id) == true) {
+                command = 'serverlog';
+                exec('powershell.exe ' + paradisePath + 'main.ps1 ' + command + ' ' + server);
+                msg.channel.send('Getting ' + server + ' most recent serverlog...');
+                setTimeout(function () { msg.channel.sendFile(tempPath + server + 'serverlog.txt', server + '_' + timeStamp('file') + ' serverlog.txt'); }, 5000);
+                //test
+                //setTimeout(function () { msg.channel.send({ files: [tempPath + server + 'serverlog.txt']}, server + '_' + timeStamp('file') + '_serverlog.txt' ); }, 5000);
             }
             else msg.channel.send('Invalid server name or permissions');
         }
