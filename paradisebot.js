@@ -47,7 +47,7 @@ client.on('message', msg => {
             if (msg.content.startsWith(prefix + 'update')) {
                 command = 'update';
                 server = msg.content.substring(8, 15);
-				console.log('powershell.exe ' + paradisePath + 'main.ps1 ' + command + '' + server);
+				console.log('powershell.exe ' + paradisePath + 'main.ps1 ' + command + ' ' + server);
                 msg.channel.send('Updating servers: ' + serverList);
                 exec('powershell.exe ' + paradisePath + 'main.ps1 ' + command + ' ' + server);
             }
