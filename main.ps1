@@ -36,7 +36,7 @@ If ($command -eq "update"){
 	    #Copy Latest Autosave and launch server
 	    foreach ($server in $serverList) {
 	    Start-Sleep -Seconds 10
-	    gci $path\$server\save | sort LastWriteTime -desc | select -first 1 | cpi -dest $path\$server\$server.sv6
+	    gci $path\$server\save\autosave | sort LastWriteTime -desc | select -first 1 | cpi -dest $path\$server\$server.sv6
 	    Start-Process $path\$server\$server.bat}
     }
     Remove-Item $tempPath\build -Recurse
@@ -45,7 +45,7 @@ If ($command -eq "update"){
 If ($command -eq "restart"){
 	taskkill /FI "Windowtitle eq $server"
 	Get-Process | where {$_.mainwindowtitle -match $server} | Wait-Process
-	gci $path\$server\save | sort LastWriteTime -desc | select -first 1 | cpi -dest $path\$server\$server.sv6
+	gci $path\$server\save\autosave | sort LastWriteTime -desc | select -first 1 | cpi -dest $path\$server\$server.sv6
 	Start-Process $path\$server\$server.bat
 }
 
@@ -71,7 +71,7 @@ If ($command -eq "kill"){
 }
 
 If ($command -eq "autosave"){
-	gci $path\$server\save | sort LastWriteTime -desc | select -first 1 | cpi -dest $temppath\$server.sv6
+	gci $path\$server\save\autosave | sort LastWriteTime -desc | select -first 1 | cpi -dest $temppath\$server.sv6
 }
 
 If ($command -eq "chatlog"){
@@ -79,5 +79,5 @@ If ($command -eq "chatlog"){
 }
 
 If ($command -eq "serverlog"){
-	gci $path\$server\serverlogs | sort LastWriteTime -desc | select -first 1 | cpi -dest $temppath\${server}serverlog.txt
+	gci $path\$server\serverlogs -Recurse | sort LastWriteTime -desc | select -first 1 | cpi -dest $temppath\${server}serverlog.txt
 }
